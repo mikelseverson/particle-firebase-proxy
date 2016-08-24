@@ -1,0 +1,17 @@
+{
+  "name": "particle-sensor",
+  "version": "1.0.0",
+  "description": "Receive data from particle, store to firebase",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Mikel Severson",
+  "license": "ISC",
+  "dependencies": {
+    "firebase": "^3.3.0",
+    "node-env-file": "^0.1.8",
+    "particle-api-js": "^6.0.2"
+  }
+}

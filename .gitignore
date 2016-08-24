@@ -1,0 +1,4 @@
+node_modules/
+serviceAccountCredentials.json
+credentials.env
+npm-debug.log
