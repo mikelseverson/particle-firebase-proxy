@@ -1,4 +1,4 @@
-# Particle firebase proxy
+#Particle firebase proxy
 
 Using a particle to collect data
 this server takes in data then sends to firebase
