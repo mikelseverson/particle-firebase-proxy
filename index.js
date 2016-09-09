@@ -63,11 +63,13 @@ const averageCron = new CronJob('0 0 * * * *', () => {
         }
       });
       if(dataArray.length > 1) {
-        const mean = _.mean(dataArray);
+        const mean = _.mean(dataArray),
+              date = new Date();
+
+        date.setMinutes(d.getMinutes() + 30);
+        date.setMinutes(0);
+
         ref.child('gathering').set({});
-        const d = new Date();
-        d.setMinutes(d.getMinutes() + 30);
-        d.setMinutes(0);
         ref.child('mean').child(d.getTime()).set(mean);
       }
     });
