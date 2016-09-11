@@ -7,7 +7,7 @@ require('node-env-file')('./credentials.env');
 
 firebase.initializeApp({
     databaseURL: process.env.DATABASE_URL,
-    serviceAccount: "./serviceAccountCredentials.json"
+    serviceAccount: process.env.SERVICE_ACCOUNT
 });
 
 var particle = new Particle();
