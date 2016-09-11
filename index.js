@@ -13,24 +13,20 @@ firebase.initializeApp({
 var particle = new Particle();
 var db = firebase.database();
 
-particleLogin();
-
-function particleLogin() {
-  particle.login({
-    username: process.env.USERNAME,
-    password: process.env.PASSWORD
-  }).then(data => {
-      console.log(`Successfully logged into particle`);
-      particle.getEventStream({
-        deviceId: process.env.DEVICE_ID,
-        auth: data.body.access_token
-      }).then(stream => {
-        stream.on('event', newData);
-      });
-    }, error => {
-      console.log('Failed to log into Particle: ', error);
+particle.login({
+  username: process.env.USERNAME,
+  password: process.env.PASSWORD
+}).then(data => {
+    console.log(`Successfully logged into particle`);
+    particle.getEventStream({
+      deviceId: process.env.DEVICE_ID,
+      auth: data.body.access_token
+    }).then(stream => {
+      stream.on('event', newData);
     });
-}
+  }, error => {
+    console.log('Failed to log into Particle: ', error);
+  });
 
 const newData = data => {
   const timestamp = Date.now();
