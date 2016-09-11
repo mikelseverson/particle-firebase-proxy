@@ -1,17 +1,16 @@
-var Particle = require('particle-api-js'),
-    firebase = require('firebase'),
-    CronJob  = require('cron').CronJob,
-    _        = require('lodash');
-
-require('node-env-file')('./credentials.env');
+const Particle = require('particle-api-js'),
+      firebase = require('firebase'),
+      CronJob  = require('cron').CronJob,
+      _        = require('lodash');
+      env      = require('node-env-file')('./credentials.env');
 
 firebase.initializeApp({
     databaseURL: process.env.DATABASE_URL,
     serviceAccount: process.env.SERVICE_ACCOUNT
 });
 
-var particle = new Particle();
-var db = firebase.database();
+const particle = new Particle();
+const db = firebase.database();
 
 particle.login({
   username: process.env.USERNAME,
@@ -34,6 +33,7 @@ const particleStream = auth => {
 
 const newData = data => {
   const timestamp = Date.now();
+
   switch(data.name) {
       case 'humidity':
           const humidity = data.data + "%"
@@ -53,17 +53,17 @@ const newData = data => {
 }
 
 const propagateData = (dataArray, ref) => {
-  const mean = _.mean(dataArray),
-        date = new Date();
+  const meanData  = _.mean(dataArray),
+        timestamp = new Date();
 
-  date.setMinutes(date.getMinutes() + 30);
-  date.setMinutes(0);
+  timestamp.setMinutes(timestamp.getMinutes() + 30);
+  timestamp.setMinutes(0);
 
   ref.child('gathering').set({});
-  ref.child('mean').child(date.getTime()).set(mean);
+  ref.child('mean').child(timestamp.getTime()).set(mean);
 }
 
-const averageCron = new CronJob('0 0 * * * *', () => { //Every Hour
+const averageCron = new CronJob('0 0 * * * *', () => {
   const refs = [db.ref('Humidity'),
                 db.ref('Temperature'),
                 db.ref('Lights')];
