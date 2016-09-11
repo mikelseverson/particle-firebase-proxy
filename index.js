@@ -60,7 +60,7 @@ const propagateData = (dataArray, ref) => {
   timestamp.setMinutes(0);
 
   ref.child('gathering').set({});
-  ref.child('mean').child(timestamp.getTime()).set(mean);
+  ref.child('mean').child(timestamp.getTime()).set(meanData);
 }
 
 const averageCron = new CronJob('0 0 * * * *', () => {
