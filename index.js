@@ -18,7 +18,7 @@ particle.login({
   password: process.env.PASSWORD
 }).then(data => {
     console.log(`Successfully logged into particle`);
-    particleStream(auth);
+    particleStream(data.body.access_token);
   }, error => {
     console.log('Failed to log into Particle: ', error);
   });
@@ -26,7 +26,7 @@ particle.login({
 const particleStream = auth => {
   particle.getEventStream({
     deviceId: process.env.DEVICE_ID,
-    auth: data.body.access_token
+    auth: auth
   }).then(stream => {
     stream.on('event', newData);
   });
