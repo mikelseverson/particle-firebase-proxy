@@ -46,31 +46,40 @@ const newData = data => {
           db.ref('Temperature/gathering/' + timestamp).set(temperature)
           break;
       case 'lightValue':
+          db.ref('current/light').set(data.data)
           db.ref('Lights/gathering/' + timestamp).set(data.data);
           break;
   }
 }
 
-const averageCron = new CronJob('0 0 * * * *', () => {
-  const refs = [db.ref('Humidity'), db.ref('Temperature'), db.ref('Lights')];
+const propagateData = (dataArray, ref) => {
+  const mean = _.mean(dataArray),
+        date = new Date();
+
+  date.setMinutes(date.getMinutes() + 30);
+  date.setMinutes(0);
+
+  ref.child('gathering').set({});
+  ref.child('mean').child(date.getTime()).set(mean);
+}
+
+const averageCron = new CronJob('0 0 * * * *', () => { //Every Hour
+  const refs = [db.ref('Humidity'),
+                db.ref('Temperature'),
+                db.ref('Lights')];
+
   _.forEach(refs, ref => {
-    const dataArray = [];
-    ref.child('gathering').once('value', data => {
+    ref.child('gathering').once('value')
+     .then(data => {
+      const gatheredData = [];
       data.forEach(data => {
         const dataInt = parseInt(data.val(), 10);
         if(Number.isInteger(dataInt)) {
-          dataArray.push(dataInt);
+          gatheredData.push(dataInt);
         }
       });
-      if(dataArray.length > 1) {
-        const mean = _.mean(dataArray),
-              date = new Date();
-
-        date.setMinutes(d.getMinutes() + 30);
-        date.setMinutes(0);
-
-        ref.child('gathering').set({});
-        ref.child('mean').child(d.getTime()).set(mean);
+      if(gatheredData.length >= 1) {
+        propagateData(gatheredData, ref);
       }
     });
   })
