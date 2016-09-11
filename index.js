@@ -18,15 +18,19 @@ particle.login({
   password: process.env.PASSWORD
 }).then(data => {
     console.log(`Successfully logged into particle`);
-    particle.getEventStream({
-      deviceId: process.env.DEVICE_ID,
-      auth: data.body.access_token
-    }).then(stream => {
-      stream.on('event', newData);
-    });
+    particleStream(auth);
   }, error => {
     console.log('Failed to log into Particle: ', error);
   });
+
+const particleStream = auth => {
+  particle.getEventStream({
+    deviceId: process.env.DEVICE_ID,
+    auth: data.body.access_token
+  }).then(stream => {
+    stream.on('event', newData);
+  });
+}
 
 const newData = data => {
   const timestamp = Date.now();
