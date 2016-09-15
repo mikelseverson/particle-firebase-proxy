@@ -52,34 +52,46 @@ const newData = data => {
   }
 }
 
-const propagateData = (dataArray, ref) => {
-  const meanData  = _.mean(dataArray),
-        timestamp = new Date();
+const propagateData = (data, ref) => {
+  const timestamp = new Date();
+        
+  let meanData,
+      dataArray = [];
+        
+  _.forOwn(data, dataSnapshot => {
+    dataArray.push(dataSnapshot.value);
+  });
+
+  meanData = _.mean(dataArray);
 
   timestamp.setMinutes(timestamp.getMinutes() + 30);
   timestamp.setMinutes(0);
 
   ref.child('gathering').set({});
-  ref.child('mean').child(timestamp.getTime()).set(meanData);
+  ref.child('mean').child(timestamp).set(meanData);
 }
 
-const averageCron = new CronJob('0 0 * * * *', () => {
+const hourCron = new CronJob('* * * * * *', () => {
   const refs = [db.ref('Humidity'),
                 db.ref('Temperature'),
                 db.ref('Lights')];
-
   _.forEach(refs, ref => {
     ref.child('gathering').once('value')
-     .then(data => {
-      const gatheredData = [];
-      data.forEach(data => {
-        const dataInt = parseInt(data.val(), 10);
+     .then(dataSnap => {
+      const data       = dataSnap.val(),
+            parsedData = [];
+
+      _.forOwn(data, (data, timestamp) => {
+        const dataInt = parseInt(data, 10);
         if(Number.isInteger(dataInt)) {
-          gatheredData.push(dataInt);
+          parsedData.push({
+            value: dataInt,
+            timestamp: timestamp
+          });
         }
       });
-      if(gatheredData.length >= 1) {
-        propagateData(gatheredData, ref);
+      if(parsedData.length >= 1) {
+        propagateData(parsedData, ref);
       }
     });
   })
