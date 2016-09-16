@@ -12,6 +12,7 @@ firebase.initializeApp({
 const particle = new Particle();
 const db = firebase.database();
 
+
 particle.login({
   username: process.env.USERNAME,
   password: process.env.PASSWORD
@@ -54,10 +55,10 @@ const newData = data => {
 
 const propagateData = (data, ref) => {
   const timestamp = new Date();
-        
+
   let meanData,
       dataArray = [];
-        
+
   _.forOwn(data, dataSnapshot => {
     dataArray.push(dataSnapshot.value);
   });
