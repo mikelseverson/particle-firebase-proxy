@@ -29,6 +29,8 @@ const particleStream = auth => {
     auth: auth
   }).then(stream => {
     stream.on('event', newData);
+  }, error => {
+    console.log(error);
   });
 }
 
@@ -36,26 +38,30 @@ const newData = data => {
   const timestamp = Date.now();
 
   switch(data.name) {
+      case 'PH':
+          const PH = Number(data.data)
+          db.ref('current/ph').set(PH)
+          db.ref(`PH/gathering/${timestamp}`).set(PH);
+          break;
       case 'humidity':
           const humidity = data.data + "%"
           db.ref('current/humidity').set(humidity)
-          db.ref('Humidity/gathering/' + timestamp).set(humidity)
+          db.ref(`Humidity/gathering/${timestamp}`).set(data.data)
           break;
       case 'tempF':
           const temperature = data.data + "°"
           db.ref('current/temperature').set(temperature)
-          db.ref('Temperature/gathering/' + timestamp).set(temperature)
+          db.ref(`Temperature/gathering/${timestamp}`).set(data.data)
           break;
       case 'lightValue':
           db.ref('current/light').set(data.data)
-          db.ref('Lights/gathering/' + timestamp).set(data.data);
+          db.ref(`Lights/gathering/${timestamp}`).set(data.data);
           break;
   }
 }
 
 const propagateData = (data, ref) => {
-  const timestamp = new Date();
-
+  const timestamp = Date.now();
   let meanData,
       dataArray = [];
 
@@ -65,17 +71,16 @@ const propagateData = (data, ref) => {
 
   meanData = _.mean(dataArray);
 
-  timestamp.setMinutes(timestamp.getMinutes() + 30);
-  timestamp.setMinutes(0);
-
   ref.child('gathering').set({});
   ref.child('mean').child(timestamp).set(meanData);
 }
 
-const hourCron = new CronJob('* * * * * *', () => {
+
+const fiteenMinCron = new CronJob('* */15 * * * *', () => {
   const refs = [db.ref('Humidity'),
                 db.ref('Temperature'),
-                db.ref('Lights')];
+                db.ref('Lights'),
+                db.ref('PH')];
   _.forEach(refs, ref => {
     ref.child('gathering').once('value')
      .then(dataSnap => {
@@ -83,13 +88,10 @@ const hourCron = new CronJob('* * * * * *', () => {
             parsedData = [];
 
       _.forOwn(data, (data, timestamp) => {
-        const dataInt = parseInt(data, 10);
-        if(Number.isInteger(dataInt)) {
-          parsedData.push({
-            value: dataInt,
-            timestamp: timestamp
-          });
-        }
+        parsedData.push({
+          value: data,
+          timestamp: timestamp
+        });
       });
       if(parsedData.length >= 1) {
         propagateData(parsedData, ref);
