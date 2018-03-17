@@ -33,6 +33,9 @@ const particleStream = auth => {
   });
 }
 
+const initializeFifteenMinCron = () =>
+  new CronJob('* */15 * * * *', () => cronHandler)();
+
 const newData = data => {
   const timestamp = Date.now();
   switch (data.name) {
@@ -69,9 +72,6 @@ const propagateData = (data, ref) => {
   ref.child('gathering').set({});
   ref.child('mean').child(Date.now()).set(_.mean(dataArray));
 }
-
-const initializeFifteenMinCron = () =>
-  new CronJob('* */15 * * * *', () => cronHandler);
 
 const cronHandler = () => [
     db.ref('Humidity'),
